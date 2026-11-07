@@ -19,19 +19,15 @@ CareRelay should answer:
 
 The product philosophy is:
 
-```text
-RICH SYSTEM UNDERNEATH
-+
+RICH SYSTEM UNDERNEATH  
++  
 MINIMAL CAREGIVER INTERACTION
-```
 
 The engineering philosophy is:
 
-```text
 BUILD THE TRUSTWORTHY CARE RECORD FIRST
 
 THEN MAKE AI BETTER AT POPULATING IT
-```
 
 ---
 
@@ -39,34 +35,30 @@ THEN MAKE AI BETTER AT POPULATING IT
 
 Final controls:
 
-```text
 [ CONFIRM ]   [ DENY ]   [ LOG ]   [ RECAP ]
 
               [ SENSING ON / OFF ]
-```
 
 Hardware architecture:
 
-```text
-XIAO ESP32S3 Sense
-├── camera
-├── onboard microphone
-├── Wi-Fi
-├── microSD
-├── CONFIRM button
-├── DENY button
-├── LOG button
-├── RECAP button
-├── sensing toggle
-├── status LEDs
-└── I2S audio output
+XIAO ESP32S3 Sense  
+├── camera  
+├── onboard microphone  
+├── Wi-Fi  
+├── microSD  
+├── CONFIRM button  
+├── DENY button  
+├── LOG button  
+├── RECAP button  
+├── sensing toggle  
+├── status LEDs  
+└── I2S audio output  
 
-XIAO
-↓
-MAX98357A
-↓
+XIAO  
+↓  
+MAX98357A  
+↓  
 4Ω / 3W speaker
-```
 
 There are intentionally no activity-specific buttons such as FEEDING, MEDICATION, CHANGING, or REPOSITIONING.
 
@@ -78,17 +70,17 @@ There are intentionally no activity-specific buttons such as FEEDING, MEDICATION
 
 Meaning:
 
-> Yes, what CareRelay just proposed is correct.
+Yes, what CareRelay just proposed is correct.
 
 Example:
 
-```text
 CareRelay:
+
 "Feeding detected. 250 milliliters. Confirm?"
 
 Caregiver:
+
 CONFIRM
-```
 
 ---
 
@@ -96,23 +88,21 @@ CONFIRM
 
 Meaning:
 
-> No, that proposal is wrong.
+No, that proposal is wrong.
 
 Flow:
 
-```text
-proposal
-↓
-DENY
-↓
-"What happened instead?"
-↓
-caregiver speaks
-↓
-structured correction
-↓
+proposal  
+↓  
+DENY  
+↓  
+"What happened instead?"  
+↓  
+caregiver speaks  
+↓  
+structured correction  
+↓  
 new amendment event
-```
 
 The original event remains stored.
 
@@ -122,27 +112,25 @@ The original event remains stored.
 
 Meaning:
 
-> Something happened and I want to tell CareRelay about it.
+Something happened and I want to tell CareRelay about it.
 
 Flow:
 
-```text
-LOG
-↓
-"What would you like to log?"
-↓
-caregiver speaks
-↓
-speech-to-text
-↓
-structured extraction
-↓
-CareEvent
-↓
-read-back
-↓
+LOG  
+↓  
+"What would you like to log?"  
+↓  
+caregiver speaks  
+↓  
+speech-to-text  
+↓  
+structured extraction  
+↓  
+CareEvent  
+↓  
+read-back  
+↓  
 CONFIRM / DENY
-```
 
 LOG is the explicit fallback when automatic sensing misses something.
 
@@ -152,7 +140,7 @@ LOG is the explicit fallback when automatic sensing misses something.
 
 Meaning:
 
-> Tell me what has happened, what matters now, and what comes next.
+Tell me what has happened, what matters now, and what comes next.
 
 RECAP does not replay raw audio or video.
 
@@ -162,25 +150,19 @@ RECAP does not replay raw audio or video.
 
 One physical switch controls both:
 
-```text
-camera
-+
+camera  
++  
 microphone
-```
 
 When ON:
 
-```text
-camera sensing enabled
+camera sensing enabled  
 microphone sensing enabled
-```
 
 When OFF:
 
-```text
-camera processing disabled
+camera processing disabled  
 microphone processing disabled
-```
 
 For V1, this must be described as:
 
@@ -190,37 +172,31 @@ CareRelay must not claim a hardware privacy cutoff until one actually exists.
 
 When sensing is OFF:
 
-```text
-red LED
-+
+red LED  
++  
 backend records sensing-off interval
-```
 
 Possible later hardware improvements include:
 
-```text
-physical camera shutter
-sensor power gating
+physical camera shutter  
+sensor power gating  
 true electrical cutoff
-```
 
 ---
 
 # 5. LED States
 
-```text
-GREEN
+GREEN  
 → sensing active
 
-YELLOW
-→ listening
-→ processing
-→ waiting for caregiver response
+YELLOW  
+→ listening  
+→ processing  
+→ waiting for caregiver response  
 → proposal interaction
 
-RED
+RED  
 → sensing disabled
-```
 
 ---
 
@@ -228,12 +204,10 @@ RED
 
 Core states:
 
-```text
-IDLE
-PROPOSAL_PENDING
-LISTENING
+IDLE  
+PROPOSAL_PENDING  
+LISTENING  
 SPEAKING
-```
 
 | State | CONFIRM | DENY | LOG | RECAP |
 |---|---|---|---|---|
@@ -244,10 +218,8 @@ SPEAKING
 
 Recording also supports:
 
-```text
-auto-stop on silence
+auto-stop on silence  
 maximum recording timeout
-```
 
 The caregiver should normally not need to press LOG twice.
 
@@ -257,29 +229,25 @@ The caregiver should normally not need to press LOG twice.
 
 If RECAP is pressed during a pending proposal:
 
-```text
-proposal pending
-↓
-pause proposal
-↓
-speak recap
-↓
+proposal pending  
+↓  
+pause proposal  
+↓  
+speak recap  
+↓  
 return to proposal
-```
 
 If LOG is pressed during a pending proposal:
 
-```text
-proposal pending
-↓
-preserve proposal
-↓
-manual logging workflow
-↓
-resolve manual event
-↓
+proposal pending  
+↓  
+preserve proposal  
+↓  
+manual logging workflow  
+↓  
+resolve manual event  
+↓  
 return to proposal
-```
 
 No pending proposal silently disappears.
 
@@ -287,37 +255,35 @@ No pending proposal silently disappears.
 
 # 8. Overall System Pipeline
 
-```text
-CAMERA
-+
-MICROPHONE
-+
-CARE SCHEDULE
-+
-RECENT CARE HISTORY
-        ↓
-possible care activity
-        ↓
-audio + visual interpretation
-        ↓
-CareEvent candidate
-        ↓
-risk + confidence policy
-        ↓
-confirm / deny / auto-log when allowed
-        ↓
-append-only event history
-        ↓
-effective timeline
-        ↓
-compare against care plan
-        ↓
-deterministic rules engine
-        ↓
-recap
-        ↓
+CAMERA  
++  
+MICROPHONE  
++  
+CARE SCHEDULE  
++  
+RECENT CARE HISTORY  
+↓  
+possible care activity  
+↓  
+audio + visual interpretation  
+↓  
+CareEvent candidate  
+↓  
+policy-derived risk + confidence decision  
+↓  
+confirm / deny / auto-log when policy allows  
+↓  
+append-only event history  
+↓  
+effective timeline  
+↓  
+compare against care plan  
+↓  
+deterministic rules engine  
+↓  
+recap  
+↓  
 dashboard + speaker
-```
 
 Vision provides evidence. It does not automatically establish truth.
 
@@ -327,79 +293,84 @@ Vision provides evidence. It does not automatically establish truth.
 
 Long-term architecture:
 
-```text
-feeding
-medication
-changing
-repositioning
-transfer
-hygiene_cleaning
-toileting
-mobility
-sleep_rest
-vitals
-equipment
-symptom_observation
-care_note
+feeding  
+medication  
+changing  
+repositioning  
+transfer  
+hygiene_cleaning  
+toileting  
+mobility  
+sleep_rest  
+vitals  
+equipment  
+symptom_observation  
+care_note  
 other
-```
 
 Step 2 fully specifies only:
 
-```text
-feeding
-medication
-changing
-repositioning
+feeding  
+medication  
+changing  
+repositioning  
 care_note
-```
 
 ---
 
 # 10. Core CareEvent Model
 
-```text
-CareEvent
-├── id
-├── recipient_id
-├── caregiver_id
-├── device_id
-│
-├── event_type
-├── lifecycle_status
-├── care_status
-├── risk_level
-│
-├── started_at
-├── ended_at
-├── time_source
-│
-├── source
-├── confidence
-│
-├── details
-├── notes
-│
-├── related_task_id
-├── amends_event_id
-│
-├── verified_at
-├── verification_method
-├── verified_by
-│
-├── created_at
+CareEvent  
+├── id  
+├── recipient_id  
+├── caregiver_id  
+├── device_id  
+├── event_type  
+├── lifecycle_status  
+├── care_status  
+├── risk_level  
+├── started_at  
+├── ended_at  
+├── time_source  
+├── source  
+├── confidence  
+├── details  
+├── notes  
+├── related_task_id  
+├── amends_event_id  
+├── verified_at  
+├── verification_method  
+├── verified_by  
+├── created_at  
 └── evaluation_metadata
-```
 
 There is no `verified: bool`.
 
 Verification is derived from:
 
-```text
-verified_at
-+
+verified_at  
++  
 verification_method
-```
+
+`risk_level` is stored on the resulting CareEvent as the policy-derived risk snapshot for that event.
+
+The caller does not authoritatively choose the event's risk level.
+
+Conceptually:
+
+event payload  
+→ describes what happened
+
+event_type  
+→ policy lookup
+
+policy registry  
+→ derives risk and auto-log eligibility
+
+validated CareEvent  
+→ stores derived risk
+
+This prevents clients, devices, or API callers from declaring their own care event to be LOW risk.
 
 ---
 
@@ -407,13 +378,11 @@ verification_method
 
 Lifecycle status describes the CareRelay/system workflow:
 
-```text
-candidate
-proposed
-confirmed
-denied
+candidate  
+proposed  
+confirmed  
+denied  
 expired
-```
 
 ---
 
@@ -421,22 +390,18 @@ expired
 
 Care status describes the caregiving activity itself:
 
-```text
-started
-in_progress
-completed
-skipped
+started  
+in_progress  
+completed  
+skipped  
 interrupted
-```
 
 Lifecycle status and care status remain separate.
 
 Example:
 
-```text
-lifecycle_status = confirmed
+lifecycle_status = confirmed  
 care_status = completed
-```
 
 ---
 
@@ -444,19 +409,15 @@ care_status = completed
 
 Human-initiated sources:
 
-```text
-manual
-dashboard
+manual  
+dashboard  
 voice
-```
 
 AI-derived sources:
 
-```text
-vision
-audio_visual
+vision  
+audio_visual  
 system
-```
 
 `voice` is explicitly considered human-initiated.
 
@@ -468,72 +429,180 @@ A caregiver pressing LOG or beginning a correction intentionally starts the inte
 
 Each event type has an explicit policy:
 
-```text
-EventPolicy
-├── risk_level
-├── auto_log_eligible
+EventPolicy  
+├── risk_level  
+├── auto_log_eligible  
 └── proposal_timeout
-```
+
+Policies are accessed through an injectable policy registry/provider rather than having validators depend directly on a module-level dictionary.
+
+Conceptually:
+
+EventPolicyRegistry  
+├── policy for feeding  
+├── policy for medication  
+├── policy for changing  
+├── policy for repositioning  
+└── policy for care_note
+
+The production policy registry is the default.
+
+Validators, event-domain services, and the Step 2 repository receive a policy registry/provider as a dependency.
+
+Conceptually:
+
+EventValidator(policy_registry=PRODUCTION_POLICY_REGISTRY)
+
+EventRepository(policy_registry=PRODUCTION_POLICY_REGISTRY)
+
+The production registry is used automatically unless a different registry is explicitly injected.
+
+This exists for two reasons:
+
+1. production behavior remains centralized and deterministic
+2. tests can inject isolated policy overrides without mutating production configuration
+
+Test-only policy registries may therefore override policies for scenarios such as N and P.
+
+Production configuration itself is never mutated by those tests.
+
+For CareRelay, all Step 2 care events are treated as HIGH risk because every caregiving event materially affects the trustworthiness of the care record.
 
 Step 2 production configuration:
 
-```text
-feeding:
-  risk_level = MEDIUM
+feeding:  
+  risk_level = HIGH  
   auto_log_eligible = False
 
-medication:
-  risk_level = HIGH
+medication:  
+  risk_level = HIGH  
   auto_log_eligible = False
 
-changing:
-  risk_level = LOW
+changing:  
+  risk_level = HIGH  
   auto_log_eligible = False
 
-repositioning:
-  risk_level = LOW
+repositioning:  
+  risk_level = HIGH  
   auto_log_eligible = False
 
-care_note:
-  risk_level = MEDIUM
+care_note:  
+  risk_level = HIGH  
   auto_log_eligible = False
-```
 
-`auto_log_eligible` is therefore False for every Step 2 event type.
+This means:
 
-Actual automatic logging is disabled during Step 2.
+ALL Step 2 care event types  
+→ HIGH risk  
+→ auto_log_eligible = False  
+→ AI-derived events require explicit human verification
 
-Only later, around Step 20 and after evaluation, CareRelay may consider:
+CareRelay does not assume that feeding, changing, repositioning, or care notes are lower risk simply because they are not medication events.
 
-```text
-changing:
-  auto_log_eligible = True
+A false record of any of these can materially affect downstream caregiving decisions.
 
-repositioning:
-  auto_log_eligible = True
-```
+Examples:
 
-if the evidence supports it.
+False feeding record  
+→ next caregiver may believe feeding already occurred
+
+False repositioning record  
+→ next caregiver may believe pressure-relief care occurred
+
+False changing record  
+→ next caregiver may believe hygiene or skin care occurred
+
+False care note  
+→ next caregiver may act on an observation that was never verified
+
+False medication record  
+→ next caregiver may believe medication was administered
+
+Therefore the Step 2 trust model is intentionally conservative:
+
+AI may propose  
+AI may assist  
+AI may structure information
+
+AI may NOT silently confirm care events
+
+Automatic logging is disabled for all production Step 2 event types.
+
+If automatic logging is ever reconsidered later, that must be treated as a deliberate future policy change supported by strong evaluation evidence rather than assumed from any supposedly low-risk category.
 
 ---
 
 # 15. Risk Behavior
 
-Risk is derived from the current event's own `event_type`.
+Risk is derived from the current event's own `event_type` through the active policy registry.
 
-Risk is never inherited from an event being amended.
+In Step 2, every event type in the production policy registry maps to:
+
+HIGH
+
+Risk is never inherited from the event being amended.
 
 Example:
 
-```text
-A = repositioning
-risk = LOW
+A = repositioning  
+production-derived risk = HIGH
 
-B = medication
+B = medication  
 B amends A
 
-B risk = HIGH
-```
+B production-derived risk = HIGH
+
+Another example:
+
+A = medication  
+production-derived risk = HIGH
+
+B = changing  
+B amends A
+
+B production-derived risk = HIGH
+
+The amendment system always performs a fresh policy lookup using B's own event type.
+
+Conceptually:
+
+B.event_type  
+↓  
+active policy registry  
+↓  
+B.risk_level
+
+It does not perform:
+
+A.risk_level  
+↓  
+copy  
+↓  
+B.risk_level
+
+Because all current production Step 2 event types are HIGH risk, every AI-derived event requires human verification before it can become confirmed.
+
+The key distinction remains:
+
+risk_level  
+→ how seriously CareRelay treats false confirmation
+
+auto_log_eligible  
+→ whether an event type could ever be allowed to confirm automatically
+
+In Step 2 production:
+
+risk_level = HIGH  
+auto_log_eligible = False
+
+for every supported event type.
+
+LOW and MEDIUM remain valid `RiskLevel` enum values only for:
+
+- test-only policy overrides
+- possible future deliberate policy changes
+
+Production Step 2 code must not assign LOW or MEDIUM to any supported care event through the default production policy.
 
 ---
 
@@ -541,62 +610,65 @@ B risk = HIGH
 
 Final verification methods:
 
-```text
-confirm_button
-dashboard
-manual_entry
+confirm_button  
+dashboard  
+manual_entry  
 auto_logged
-```
 
 ## manual_entry
 
 Valid only for human-initiated sources:
 
-```text
-manual
-dashboard
+manual  
+dashboard  
 voice
-```
 
 Invalid for:
 
-```text
-vision
-audio_visual
+vision  
+audio_visual  
 system
-```
 
 ## confirm_button
 
 Valid for:
 
-```text
-human-initiated sources
-or
+human-initiated sources  
+or  
 AI-derived sources
-```
 
 ## dashboard
 
 Valid for:
 
-```text
-human-initiated sources
-or
+human-initiated sources  
+or  
 AI-derived sources
-```
 
 ## auto_logged
 
 Valid only when all three conditions are true:
 
-```text
 1. source is AI-derived
-2. risk_level != HIGH
-3. event policy auto_log_eligible = True
-```
+2. policy-derived risk_level != HIGH
+3. active event policy has auto_log_eligible = True
 
 If any condition fails, the event is rejected.
+
+The caller does not provide `auto_log_eligible` as authoritative event data.
+
+CareRelay retrieves it from the active policy registry.
+
+Likewise, the caller does not bypass the policy by manually declaring an event LOW risk.
+
+Under the production Step 2 policy, the `auto_logged` branch is intentionally unreachable because:
+
+- every supported production event type derives HIGH risk
+- `auto_log_eligible = False` for every supported production event type
+
+Scenario P exercises this validator using a test-only injected policy registry.
+
+The validator remains part of the domain model because it acts as a guardrail if automatic logging is ever deliberately introduced later.
 
 ---
 
@@ -604,16 +676,12 @@ If any condition fails, the event is rejected.
 
 Any event with:
 
-```text
 lifecycle_status = confirmed
-```
 
 must contain:
 
-```text
-verified_at
+verified_at  
 verification_method
-```
 
 There are no exceptions.
 
@@ -623,26 +691,30 @@ There are no exceptions.
 
 AI-derived HIGH-risk events may not use:
 
-```text
 auto_logged
-```
 
 Example:
 
-```text
-event_type = medication
-source = audio_visual
+event_type = medication  
+source = audio_visual  
 verification_method = auto_logged
 
-→ INVALID
-```
+Production policy lookup:
+
+medication  
+→ HIGH  
+→ auto_log_eligible = False
+
+Result:
+
+INVALID
+
+The same rule applies to feeding, changing, repositioning, and care notes because all Step 2 production event types are HIGH risk.
 
 They require human confirmation such as:
 
-```text
-confirm_button
+confirm_button  
 dashboard
-```
 
 ---
 
@@ -652,13 +724,17 @@ Human-initiated HIGH-risk events are allowed.
 
 Example:
 
-```text
-source = voice
-event_type = medication
+source = voice  
+event_type = medication  
 verification_method = manual_entry
-```
+
+Production policy derives:
+
+risk_level = HIGH
 
 Valid.
+
+The same pattern applies to other human-initiated care events.
 
 ---
 
@@ -668,19 +744,15 @@ Valid.
 
 Example:
 
-```text
-verification_method = confirm_button
-verified_at = timestamp
+verification_method = confirm_button  
+verified_at = timestamp  
 verified_by = null
-```
 
 A shared physical device may not know which caregiver pressed the button.
 
 Later CareRelay adds:
 
-```text
 current_caregiver
-```
 
 selected through the dashboard or at shift start.
 
@@ -692,20 +764,16 @@ Corrections never overwrite historical events.
 
 Example:
 
-```text
-A:
+A:  
 repositioning
-```
 
 Caregiver corrects it.
 
 Create:
 
-```text
-B:
-changing
+B:  
+changing  
 amends_event_id = A.id
-```
 
 A remains stored.
 
@@ -715,22 +783,16 @@ A remains stored.
 
 `amends_event_id` must reference:
 
-```text
 1. an existing event
 2. belonging to the same recipient
-```
 
 Reject:
 
-```text
 nonexistent amendment target
-```
 
 and:
 
-```text
 cross-recipient amendment
-```
 
 ---
 
@@ -740,28 +802,22 @@ An event may have only one active amendment.
 
 Active means:
 
-```text
-proposed
+proposed  
 confirmed
-```
 
 Denied and expired amendments do not count as active.
 
 Valid:
 
-```text
 A → B → C
-```
 
 Invalid while B is active:
 
-```text
      B
     /
 A
-    \
+    
      C
-```
 
 ---
 
@@ -769,57 +825,41 @@ A
 
 One rule controls amendment resolution:
 
-> For each amendment chain, return the latest event whose `lifecycle_status = confirmed`.
+For each amendment chain, return the latest event whose `lifecycle_status = confirmed`.
 
 If there is no confirmed event in the chain:
 
-```text
 show nothing
-```
 
 Examples:
 
-```text
-confirmed A
-+ proposed B
+confirmed A  
++ proposed B  
 → A
-```
 
-```text
-confirmed A
-+ confirmed B
+confirmed A  
++ confirmed B  
 → B
-```
 
-```text
-confirmed A
-+ denied B
+confirmed A  
++ denied B  
 → A
-```
 
-```text
-confirmed A
-+ expired B
+confirmed A  
++ expired B  
 → A
-```
 
-```text
-denied A
-+ confirmed B
+denied A  
++ confirmed B  
 → B
-```
 
-```text
-proposed A
-+ denied B
+proposed A  
++ denied B  
 → nothing
-```
 
-```text
-A → B → C
-latest confirmed = C
+A → B → C  
+latest confirmed = C  
 → C
-```
 
 ---
 
@@ -827,24 +867,20 @@ latest confirmed = C
 
 Example:
 
-```text
-AI proposes feeding
-↓
-caregiver presses DENY
-↓
+AI proposes feeding  
+↓  
+caregiver presses DENY  
+↓  
 no correction
-```
 
 The event does not appear in the effective care timeline.
 
 It remains stored for:
 
-```text
-evaluation
-debugging
-false-positive measurement
+evaluation  
+debugging  
+false-positive measurement  
 future retraining
-```
 
 ---
 
@@ -852,22 +888,18 @@ future retraining
 
 These are separate.
 
-```text
-started_at / ended_at
+started_at / ended_at  
 → when care happened
 
-created_at
+created_at  
 → when CareRelay recorded it
-```
 
 Late entry is valid.
 
 Example:
 
-```text
-started_at = 12:00 PM
+started_at = 12:00 PM  
 created_at = 4:17 PM
-```
 
 ---
 
@@ -875,20 +907,16 @@ created_at = 4:17 PM
 
 Supported values:
 
-```text
-sensor_observed
-caregiver_reported_exact
-caregiver_reported_approximate
+sensor_observed  
+caregiver_reported_exact  
+caregiver_reported_approximate  
 system_inferred
-```
 
 There is no separate `time_precision`.
 
 If needed later:
 
-```text
 time_uncertainty_minutes
-```
 
 may be added.
 
@@ -902,15 +930,11 @@ Naive datetimes are rejected.
 
 Also:
 
-```text
 ended_at >= started_at
-```
 
 and:
 
-```text
 started_at cannot be meaningfully in the future
-```
 
 A small configurable allowance exists for clock skew.
 
@@ -922,108 +946,88 @@ The recipient's local timezone is stored separately later.
 
 # 29. FeedingDetails
 
-```text
-feeding_type
-food_or_formula
-quantity
-unit
-route
-tolerance
-observations
+feeding_type  
+food_or_formula  
+quantity  
+unit  
+route  
+tolerance  
+observations  
 issues
-```
 
 Example:
 
-```json
-{
-  "event_type": "feeding",
-  "details": {
-    "feeding_type": "tube",
-    "food_or_formula": "Formula A",
-    "quantity": 250,
-    "unit": "mL",
-    "route": "g_tube",
-    "tolerance": "mostly_tolerated",
-    "observations": [
-      "mild coughing near end"
-    ]
-  }
-}
-```
+event_type = feeding
+
+details:
+- feeding_type = tube
+- food_or_formula = Formula A
+- quantity = 250
+- unit = mL
+- route = g_tube
+- tolerance = mostly_tolerated
+- observations = mild coughing near end
 
 ---
 
 # 30. MedicationDetails
 
-```text
-medication_name
-dose
-dose_unit
-route
-scheduled_at
-administered_at
-is_prn
-reason_if_prn
+medication_name  
+dose  
+dose_unit  
+route  
+scheduled_at  
+administered_at  
+is_prn  
+reason_if_prn  
 notes
-```
 
-Medication begins HIGH risk.
+Medication is HIGH risk under the production policy.
 
 ---
 
 # 31. ChangingDetails
 
-```text
-change_type
-condition
-skin_condition
-barrier_cream_applied
-clothing_changed
+change_type  
+condition  
+skin_condition  
+barrier_cream_applied  
+clothing_changed  
 notes
-```
 
 Possible condition:
 
-```text
-wet
-soiled
-both
+wet  
+soiled  
+both  
 dry
-```
 
 ---
 
 # 32. RepositioningDetails
 
-```text
-from_position
-to_position
-assistance_level
-reason
+from_position  
+to_position  
+assistance_level  
+reason  
 skin_observation
-```
 
 ---
 
 # 33. CareNoteDetails
 
-```text
-category
-observation
-severity_optional
+category  
+observation  
+severity_optional  
 notes
-```
 
 Initial categories may include:
 
-```text
-symptom_observation
-behavior
-skin
-equipment
+symptom_observation  
+behavior  
+skin  
+equipment  
 general
-```
 
 ---
 
@@ -1035,30 +1039,42 @@ Manual events do not require evaluation metadata.
 
 AI-generated events may contain:
 
-```text
-model_prediction
-model_confidence
-source_modalities
-proposal_created_at
-human_response
-human_correction
-confirmation_time
+model_prediction  
+model_confidence  
+source_modalities  
+proposal_created_at  
+human_response  
+human_correction  
+confirmation_time  
 processing_latency
-```
 
 Later metrics include:
 
-```text
-accuracy
-precision
-recall
-F1
-false-positive rate
-correction rate
-confirmation rate
-confirmation latency
-speech extraction accuracy
-```
+accuracy  
+precision  
+recall  
+F1  
+false-positive rate  
+correction rate  
+confirmation rate  
+confirmation latency  
+speech extraction accuracy  
+proposal frequency
+
+Because every AI-derived event requires human confirmation in the current production policy, confirmation burden is a key product metric.
+
+CareRelay should specifically monitor:
+
+- confirmation rate
+- confirmation latency
+- correction rate
+- proposal frequency
+
+These metrics help determine whether CareRelay is reducing caregiver work or asking for confirmation too often.
+
+A high proposal frequency combined with low confirmation rate or slow confirmation latency may indicate that CareRelay is interrupting caregivers too often.
+
+Evaluation must therefore measure not only model correctness but also the human interaction burden created by the model.
 
 ---
 
@@ -1066,19 +1082,17 @@ speech extraction accuracy
 
 Proposal timeout is configurable through EventPolicy.
 
+The timeout comes from the active policy registry.
+
 Step 2 implements:
 
-```text
 expire_overdue_proposals()
-```
 
 It is called:
 
-```text
-explicitly
-and
+explicitly  
+and  
 before relevant reads
-```
 
 No background scheduler is required yet.
 
@@ -1088,43 +1102,41 @@ Expired events remain stored.
 
 # 36. Manual LOG Workflow
 
-```text
-LOG
-↓
-"What would you like to log?"
-↓
-audio
-↓
-speech-to-text
-↓
-structured extraction
-↓
-CareEvent
-↓
-read-back
-↓
+LOG  
+↓  
+"What would you like to log?"  
+↓  
+audio  
+↓  
+speech-to-text  
+↓  
+structured extraction  
+↓  
+CareEvent  
+↓  
+read-back  
+↓  
 CONFIRM / DENY
-```
 
 ---
 
 # 37. DENY Correction Workflow
 
-```text
-proposal
-↓
-DENY
-↓
-"What happened instead?"
-↓
-voice correction
-↓
-structured event
-↓
-amends_event_id
-↓
+proposal  
+↓  
+DENY  
+↓  
+"What happened instead?"  
+↓  
+voice correction  
+↓  
+structured event  
+↓  
+amends_event_id  
+↓  
+fresh policy lookup for corrected event type  
+↓  
 confirmation
-```
 
 ---
 
@@ -1134,25 +1146,21 @@ Ambient speech alone does not initially create care events.
 
 Invalid behavior:
 
-```text
-TV says:
+TV says:  
 "Take ten milligrams"
 
 → medication event
-```
 
 CareRelay must ignore this.
 
 A stronger candidate may exist when multiple signals agree:
 
-```text
-feeding-like activity
-+
-feeding expected around now
-+
-"finished 250"
+feeding-like activity  
++  
+feeding expected around now  
++  
+"finished 250"  
 → feeding candidate
-```
 
 ---
 
@@ -1160,19 +1168,17 @@ feeding expected around now
 
 Later:
 
-```text
-Stage 0
+Stage 0  
 motion/audio-energy gate
 
-Stage 1
+Stage 1  
 possible caregiving context
 
-Stage 2
+Stage 2  
 short relevant media window
 
-Stage 3
+Stage 3  
 vision + speech + schedule interpretation
-```
 
 This is not required for the initial MVP.
 
@@ -1182,29 +1188,25 @@ This is not required for the initial MVP.
 
 Default architecture:
 
-```text
-temporary rolling buffer
-↓
-event trigger
-↓
-short relevant media window
-↓
-analysis
-↓
-structured event retained
-↓
+temporary rolling buffer  
+↓  
+event trigger  
+↓  
+short relevant media window  
+↓  
+analysis  
+↓  
+structured event retained  
+↓  
 raw media discarded
-```
 
 The primary record is structured care data.
 
 Potential optional retention later:
 
-```text
-never retain clips
-retain for 24 hours
+never retain clips  
+retain for 24 hours  
 retain for 7 days
-```
 
 ---
 
@@ -1212,25 +1214,19 @@ retain for 7 days
 
 The XIAO periodically reports:
 
-```text
-device alive
+device alive  
 sensing state
-```
 
 Initial target:
 
-```text
 approximately every 30–60 seconds
-```
 
 Backend determines:
 
-```text
-online
-offline
-sensing on
+online  
+offline  
+sensing on  
 sensing off
-```
 
 ---
 
@@ -1238,11 +1234,9 @@ sensing off
 
 Example:
 
-```text
-1:00–2:06 PM  ON
-2:06–2:47 PM  OFF
+1:00–2:06 PM  ON  
+2:06–2:47 PM  OFF  
 2:47–5:00 PM  ON
-```
 
 Sensing intervals later feed care-state reasoning.
 
@@ -1252,24 +1246,20 @@ Sensing intervals later feed care-state reasoning.
 
 A care task may potentially be considered MISSED when:
 
-```text
-task expected
-+
-device online
-+
-sensing available
-+
+task expected  
++  
+device online  
++  
+sensing available  
++  
 no matching event
-```
 
 A task is UNKNOWN when:
 
-```text
-device offline
-or
-sensing disabled
+device offline  
+or  
+sensing disabled  
 during relevant interval
-```
 
 CareRelay must never claim care was missed simply because it could not observe.
 
@@ -1281,26 +1271,22 @@ Expected care exists separately from actual events.
 
 Example:
 
-```text
-8:00 AM   feeding
-11:00 AM  repositioning
-12:00 PM  medication
-2:00 PM   feeding
+8:00 AM   feeding  
+11:00 AM  repositioning  
+12:00 PM  medication  
+2:00 PM   feeding  
 4:00 PM   medication
-```
 
 Later the care plan supports:
 
-```text
-exact times
-time windows
-every-N-hours rules
-PRN tasks
-instructions
-feeding protocols
-medication protocols
+exact times  
+time windows  
+every-N-hours rules  
+PRN tasks  
+instructions  
+feeding protocols  
+medication protocols  
 equipment instructions
-```
 
 ---
 
@@ -1308,25 +1294,21 @@ equipment instructions
 
 Possible task states:
 
-```text
-upcoming
-completed
-late
-overdue
-missed
-unknown
+upcoming  
+completed  
+late  
+overdue  
+missed  
+unknown  
 unresolved
-```
 
 Example:
 
-```text
-medication due = 12:00 PM
+medication due = 12:00 PM  
 confirmed event = 12:18 PM
 
-→ completed
+→ completed  
 → 18 minutes late
-```
 
 These states are determined by normal deterministic code, not an LLM.
 
@@ -1336,12 +1318,10 @@ These states are determined by normal deterministic code, not an LLM.
 
 Main surfaces:
 
-```text
-TODAY
-TIMELINE
-RECAP
+TODAY  
+TIMELINE  
+RECAP  
 CARE PLAN
-```
 
 ## Today
 
@@ -1349,14 +1329,12 @@ Shows current task status.
 
 Example:
 
-```text
-✓ Morning feeding
-✓ Medication
+✓ Morning feeding  
+✓ Medication  
 ✓ Changing
 
-○ Repositioning due in 34 min
+○ Repositioning due in 34 min  
 ○ Medication at 4 PM
-```
 
 ## Timeline
 
@@ -1378,39 +1356,33 @@ Manages expected care routines and instructions.
 
 Fact construction:
 
-```text
-effective timeline
-+
-task states
-+
-upcoming care
-+
-unknown sensing periods
-↓
+effective timeline  
++  
+task states  
++  
+upcoming care  
++  
+unknown sensing periods  
+↓  
 fact packet
-```
 
 There is always a deterministic recap path:
 
-```text
-fact packet
-↓
-deterministic template
-↓
+fact packet  
+↓  
+deterministic template  
+↓  
 valid recap
-```
 
 Optional enhancement:
 
-```text
-fact packet
-↓
-LLM
-↓
-fact validator
-↓
+fact packet  
+↓  
+LLM  
+↓  
+fact validator  
+↓  
 accept or fallback
-```
 
 ---
 
@@ -1418,21 +1390,17 @@ accept or fallback
 
 The LLM may:
 
-```text
-summarize
-rephrase
+summarize  
+rephrase  
 improve readability
-```
 
 The LLM may not establish:
 
-```text
-whether medication occurred
-when care occurred
-how much was given
-whether something was late
+whether medication occurred  
+when care occurred  
+how much was given  
+whether something was late  
 whether something was missed
-```
 
 Those facts come from structured records and deterministic rules.
 
@@ -1440,28 +1408,24 @@ Those facts come from structured records and deterministic rules.
 
 # 49. Speaker Path
 
-```text
-text
-↓
-text-to-speech
-↓
-XIAO
-↓
-I2S
-↓
-MAX98357A
-↓
+text  
+↓  
+text-to-speech  
+↓  
+XIAO  
+↓  
+I2S  
+↓  
+MAX98357A  
+↓  
 speaker
-```
 
 Used for:
 
-```text
-proposal prompts
-LOG prompts
-correction prompts
+proposal prompts  
+LOG prompts  
+correction prompts  
 RECAP
-```
 
 ---
 
@@ -1469,27 +1433,43 @@ RECAP
 
 Initial processing:
 
-```text
-XIAO
-↓ Wi-Fi
-Mac
-↓
-FastAPI
-↓
+XIAO  
+↓ Wi-Fi  
+Mac  
+↓  
+FastAPI  
+↓  
 PostgreSQL
-```
 
 Backend owns:
 
-```text
-events
-care plans
-rules
-device state
-speech processing
-ML
+events  
+care plans  
+rules  
+device state  
+speech processing  
+ML  
 recap
-```
+
+Within the backend, policy-dependent event-domain components receive the active EventPolicyRegistry through dependency injection.
+
+Production:
+
+FastAPI / event service  
+↓  
+production policy registry  
+↓  
+validators + repository
+
+Tests:
+
+test  
+↓  
+test policy registry  
+↓  
+validators + repository
+
+This prevents tests from modifying global production policy state.
 
 ---
 
@@ -1497,17 +1477,13 @@ recap
 
 Before meaningful hardware integration:
 
-```text
-device_id
-+
+device_id  
++  
 static per-device token
-```
 
 Backend stores:
 
-```text
 hash(token)
-```
 
 rather than the plaintext token.
 
@@ -1521,23 +1497,17 @@ A static per-device token is sufficient for the prototype.
 
 Later add:
 
-```text
 current_caregiver
-```
 
 Selected through:
 
-```text
-dashboard
-or
+dashboard  
+or  
 shift-start interaction
-```
 
 Until then:
 
-```text
 verified_by = null
-```
 
 is valid for physical-button verification.
 
@@ -1545,12 +1515,10 @@ is valid for physical-button verification.
 
 # 53. V1 Scope
 
-```text
-1 care recipient
-1 primary CareRelay device
-1 primary room
+1 care recipient  
+1 primary CareRelay device  
+1 primary room  
 multiple caregivers
-```
 
 `recipient_id` remains part of the model for future expansion.
 
@@ -1564,25 +1532,21 @@ Vision is an advanced automation layer rather than an MVP dependency.
 
 Initial classes may include:
 
-```text
-feeding
-repositioning
-changing
-transfer
+feeding  
+repositioning  
+changing  
+transfer  
 other
-```
 
 Vision outputs probabilities.
 
 Example:
 
-```text
-feeding         0.88
-repositioning   0.05
-changing        0.03
-transfer        0.01
+feeding         0.88  
+repositioning   0.05  
+changing        0.03  
+transfer        0.01  
 other           0.03
-```
 
 These are evidence, not facts.
 
@@ -1592,13 +1556,11 @@ These are evidence, not facts.
 
 Eventually combine:
 
-```text
-vision probabilities
-audio transcript
-care schedule
-time of day
+vision probabilities  
+audio transcript  
+care schedule  
+time of day  
 recent care history
-```
 
 Initial fusion may use deterministic/simple scoring.
 
@@ -1610,14 +1572,12 @@ A complex multimodal neural network is not required initially.
 
 Example:
 
-```text
-2 PM feeding expected
-+
-feeding-like activity
-+
-"finished 250"
+2 PM feeding expected  
++  
+feeding-like activity  
++  
+"finished 250"  
 → confidence increases
-```
 
 Schedule alone never proves an activity happened.
 
@@ -1629,19 +1589,19 @@ Each DENY + correction produces useful labeled information.
 
 Example:
 
-```text
-AI prediction = repositioning
+AI prediction = repositioning  
 human correction = changing
-```
 
 This supports:
 
-```text
-evaluation
-dataset creation
-model retraining
+evaluation  
+dataset creation  
+model retraining  
 model improvement
-```
+
+Because the correction creates a new event type, the corrected event receives a fresh policy lookup.
+
+Its risk is not inherited from the original prediction.
 
 ---
 
@@ -1649,23 +1609,19 @@ model improvement
 
 Later, start with simple explainable methods:
 
-```text
-median
-MAD
-rolling averages
+median  
+MAD  
+rolling averages  
 thresholds
-```
 
 Example:
 
-```text
-usual feeding duration = 45 minutes
+usual feeding duration = 45 minutes  
 current feeding = 79 minutes
-```
 
 CareRelay may say:
 
-> “This feeding lasted longer than usual.”
+"This feeding lasted longer than usual."
 
 It should not make diagnostic claims.
 
@@ -1675,95 +1631,114 @@ It should not make diagnostic claims.
 
 Already implemented:
 
-```text
-project structure
-Git
-Python virtual environment
-FastAPI
-dependencies
-root endpoint
-health endpoint
+project structure  
+Git  
+Python virtual environment  
+FastAPI  
+dependencies  
+root endpoint  
+health endpoint  
 Swagger documentation
-```
 
 ---
 
 # 60. Step 2 — Event Domain Layer
 
-This is the next build step.
+This is the current build step.
 
 ## Enums
 
-```text
-EventType
-LifecycleStatus
-CareStatus
-RiskLevel
-EventSource
-TimeSource
+EventType  
+LifecycleStatus  
+CareStatus  
+RiskLevel  
+EventSource  
+TimeSource  
 VerificationMethod
-```
 
 ## Detail Schemas
 
-```text
-FeedingDetails
-MedicationDetails
-ChangingDetails
-RepositioningDetails
+FeedingDetails  
+MedicationDetails  
+ChangingDetails  
+RepositioningDetails  
 CareNoteDetails
-```
 
 ## Core Schemas
 
-```text
-EvaluationMetadata
+EvaluationMetadata  
 CareEvent
-```
 
 ## Policy Configuration
 
-```text
-risk_level
-auto_log_eligible
+EventPolicy  
+EventPolicyRegistry
+
+Each EventPolicy contains:
+
+risk_level  
+auto_log_eligible  
 proposal_timeout
-```
+
+The production registry is the default dependency.
+
+Test registries may override individual policies without mutating production configuration.
+
+Production Step 2 policy:
+
+ALL supported event types  
+→ risk_level = HIGH  
+→ auto_log_eligible = False
 
 ## Domain Rules
 
-```text
-EventSource human/AI classification
-verification-method compatibility
+EventSource human/AI classification  
+verification-method compatibility  
 confirmed-event validation
 
-amendment target existence
-same-recipient amendment validation
+policy-derived risk  
+policy-derived auto-log eligibility  
+injectable policy registry
+
+amendment target existence  
+same-recipient amendment validation  
 one-active-amendment rule
 
-risk derived from current event type
+risk derived from current event type  
+fresh policy lookup for amendments  
 effective timeline resolver
 
-timezone/time validation
+timezone/time validation  
 proposal expiry
-```
 
 ## Storage
 
-```text
 in-memory repository only
-```
+
+The Step 2 in-memory repository receives the active policy registry/provider.
+
+Production code uses the default production registry.
+
+Tests may construct repositories with isolated test registries.
 
 ## Minimal API
 
-```text
-create event
-confirm event
-deny event
-amend event
+create event  
+confirm event  
+deny event  
+amend event  
 get effective timeline
-```
 
 No generic CRUD is required in Step 2.
+
+API callers provide event facts.
+
+They do not authoritatively provide:
+
+risk_level  
+auto_log_eligible
+
+Those come from the active policy registry.
 
 ---
 
@@ -1771,7 +1746,11 @@ No generic CRUD is required in Step 2.
 
 ## A — Medication Confirmation
 
-Create a proposed HIGH-risk medication event.
+Create a proposed medication event.
+
+The production policy derives:
+
+risk_level = HIGH
 
 Human-confirm it.
 
@@ -1781,23 +1760,21 @@ The resulting event is valid and effective.
 
 ## B — Basic Amendment
 
-```text
-A = repositioning
-B = changing
+A = repositioning  
+B = changing  
 B amends A
-```
 
 B confirmed.
 
 Effective timeline returns B.
 
+Both risks are independently derived from their own event types.
+
 ---
 
 ## C — Amendment Chain
 
-```text
 A → B → C
-```
 
 Latest confirmed C is returned.
 
@@ -1815,11 +1792,9 @@ It remains stored but does not appear in the effective timeline.
 
 Reject invalid values including:
 
-```text
-negative medication dose
-invalid enum
+negative medication dose  
+invalid enum  
 invalid timestamps
-```
 
 ---
 
@@ -1835,13 +1810,13 @@ Effective timeline continues to return A.
 
 ## G — HIGH-Risk Auto-Logging Rejected
 
-AI-derived HIGH-risk event using:
+Using the production policy registry, create an AI-derived care event using:
 
-```text
 verification_method = auto_logged
-```
 
-is rejected.
+The policy derives HIGH risk.
+
+The event is rejected.
 
 ---
 
@@ -1859,10 +1834,8 @@ A caregiver may report an earlier approximate event.
 
 Example:
 
-```text
-started_at < created_at
+started_at < created_at  
 time_source = caregiver_reported_approximate
-```
 
 Valid.
 
@@ -1880,11 +1853,9 @@ The timeline still shows A until B is confirmed.
 
 ## K — Denied Original + Confirmed Correction
 
-```text
-A = denied AI proposal
-B = confirmed correction
+A = denied AI proposal  
+B = confirmed correction  
 B amends A
-```
 
 Effective timeline returns B.
 
@@ -1904,53 +1875,129 @@ An amendment targeting an event belonging to another recipient is rejected.
 
 ## N — Risk Recalculation
 
-The amendment's risk comes from its own event type.
+An amendment's risk must always be derived from the amended event's own event type.
 
-Example:
+It must never be copied from its parent event.
 
-```text
-A = repositioning → LOW
-B = medication → HIGH
+Because every production Step 2 event type is HIGH risk, this behavior is tested using an injected test-only policy registry.
+
+### Case 1
+
+Test registry:
+
+repositioning  
+→ LOW
+
+medication  
+→ HIGH
+
+Create:
+
+A = repositioning
+
+Expected:
+
+A.risk_level = LOW
+
+Then:
+
+B = medication  
 B amends A
-```
 
-B remains HIGH.
+Expected:
+
+B.risk_level = HIGH
+
+The child must not inherit A's LOW risk.
+
+### Case 2
+
+Use a test registry where:
+
+medication  
+→ HIGH
+
+repositioning  
+→ LOW
+
+Create:
+
+A = medication
+
+Expected:
+
+A.risk_level = HIGH
+
+Then:
+
+B = repositioning  
+B amends A
+
+Expected:
+
+B.risk_level = LOW
+
+The child must not inherit A's HIGH risk.
+
+Both directions are required.
+
+Otherwise, an implementation that accidentally copies parent risk could pass a one-direction test by coincidence.
+
+The production policy registry remains unchanged and continues to map every supported event type to HIGH.
 
 ---
 
 ## O — Manual HIGH-Risk Event
 
-Human-initiated medication event using:
+Create a human-initiated medication event using:
 
-```text
+source = voice  
 verification_method = manual_entry
-```
 
-is valid.
+The production policy derives HIGH risk.
+
+The event is valid.
+
+The same principle applies to other human-initiated HIGH-risk care events.
 
 ---
 
 ## P — Auto-Log Validator Can Allow Explicit Eligibility
 
-Use a **test-only policy override**:
+This is a generic validator test only.
 
-```text
-repositioning:
-  risk_level = LOW
+Create an injected test policy registry containing:
+
+repositioning:  
+  risk_level = LOW  
   auto_log_eligible = True
-```
 
-Then:
+Then create:
 
-```text
-event_type = repositioning
-source = vision
+event_type = repositioning  
+source = vision  
 verification_method = auto_logged
-```
 
-is valid.
+Using that test registry:
 
-Production Step 2 configuration is not changed.
+derived risk_level = LOW  
+derived auto_log_eligible = True
+
+The event is valid.
+
+This exists only to prove that the generic validator behaves correctly when an injected policy explicitly permits automatic logging.
+
+The test does not mutate the production registry.
+
+Production Step 2 remains:
+
+repositioning  
+→ HIGH  
+→ auto_log_eligible = False
+
+The `auto_logged` branch is therefore intentionally unreachable in production Step 2.
+
+The validator is intentionally retained as a guardrail for any deliberate future policy change.
 
 ---
 
@@ -1968,9 +2015,7 @@ Timezone-naive datetime is rejected.
 
 ## S — Invalid End Time
 
-```text
 ended_at < started_at
-```
 
 is rejected.
 
@@ -1988,11 +2033,11 @@ A small configured clock-skew tolerance is allowed.
 
 An overdue proposal becomes:
 
-```text
 expired
-```
 
 when the expiry function or relevant read runs.
+
+The timeout comes from the active policy registry.
 
 ---
 
@@ -2000,17 +2045,15 @@ when the expiry function or relevant read runs.
 
 These sources:
 
-```text
-manual
-dashboard
+manual  
+dashboard  
 voice
-```
 
 cannot use:
 
-```text
 auto_logged
-```
+
+even if a test policy were otherwise auto-log eligible.
 
 ---
 
@@ -2018,11 +2061,9 @@ auto_logged
 
 Any confirmed event missing:
 
-```text
-verified_at
-or
+verified_at  
+or  
 verification_method
-```
 
 is rejected.
 
@@ -2034,17 +2075,13 @@ is rejected.
 
 Invalid:
 
-```text
-source = vision
+source = vision  
 verification_method = manual_entry
-```
 
 Also verify that:
 
-```text
-confirm_button
+confirm_button  
 dashboard
-```
 
 may be used with human-initiated or AI-derived sources when all other rules are satisfied.
 
@@ -2052,27 +2089,35 @@ may be used with human-initiated or AI-derived sources when all other rules are 
 
 ## Y — Production Step 2 Auto-Logging Is Truly Disabled
 
-Using the real Step 2 policy:
+Use the real default production policy registry.
 
-```text
-event_type = repositioning
-risk_level = LOW
-source = vision
+Do not manually supply:
+
+risk_level  
+auto_log_eligible
+
+Create:
+
+event_type = repositioning  
+source = vision  
 verification_method = auto_logged
+
+The production registry must derive:
+
+risk_level = HIGH  
 auto_log_eligible = False
-```
 
-must be rejected.
+The event must therefore be rejected.
 
-This proves that:
+This proves the actual production configuration rather than a hand-built test representation of it.
 
-```text
-P
-→ auto-logging can work if explicitly enabled
+Together:
 
-Y
-→ auto-logging is actually disabled in Step 2
-```
+P  
+→ the generic validator can technically permit auto-logging when an injected test policy explicitly allows it
+
+Y  
+→ the real default CareRelay production policy permits no automatic logging
 
 ---
 
@@ -2080,39 +2125,47 @@ Y
 
 Step 2 is built test-first.
 
-```text
-1. Save docs/ARCHITECTURE.md
+1. Save `docs/ARCHITECTURE.md`
 
 2. Commit frozen architecture
 
-3. Write failing tests A–Y
+3. Define EventPolicy and injectable EventPolicyRegistry
 
-4. Implement enums
+4. Preserve the production policy registry as the default
 
-5. Implement EventPolicy config
+5. Write failing acceptance tests A–Y
 
-6. Implement five detail schemas
+6. Use isolated test registries for N and P
 
-7. Implement CareEvent + validators
+7. Ensure Y uses the untouched default production registry
 
-8. Implement in-memory repository
+8. Implement enums
 
-9. Implement amendment rules
+9. Implement five detail schemas
 
-10. Implement effective timeline resolver
+10. Implement CareEvent + validators
 
-11. Implement proposal expiry
+11. Derive event risk through the active policy registry
 
-12. Implement minimal API endpoints
+12. Implement in-memory repository with injected policy dependency
 
-13. Run tests until A–Y all pass
+13. Implement amendment rules
 
-14. Commit Step 2
+14. Perform a fresh policy lookup for every amendment event
 
-15. Move to PostgreSQL
-```
+15. Implement effective timeline resolver
 
-Any new design issue discovered from this point becomes a failing test first.
+16. Implement proposal expiry
+
+17. Implement minimal API endpoints
+
+18. Run tests until A–Y all pass
+
+19. Commit Step 2
+
+20. Move to PostgreSQL
+
+Any new design issue discovered from this point becomes a failing test rather than another architecture-planning cycle.
 
 ---
 
@@ -2120,20 +2173,21 @@ Any new design issue discovered from this point becomes a failing test first.
 
 Replace in-memory persistence with:
 
-```text
-SQLAlchemy
-+
+SQLAlchemy  
++  
 PostgreSQL
-```
 
 Persist:
 
-```text
-events
-amendment relationships
-verification metadata
-evaluation metadata
-```
+events  
+amendment relationships  
+verification metadata  
+evaluation metadata  
+derived event risk snapshot
+
+The application/domain layer continues to use the production EventPolicyRegistry as its default policy source.
+
+PostgreSQL persistence must not become a second independent source of policy truth.
 
 ---
 
@@ -2143,20 +2197,18 @@ May overlap with Step 3.
 
 Test:
 
-```text
-boot
-Wi-Fi
-device authentication
-CONFIRM
-DENY
-LOG
-RECAP
-sensing toggle
-LEDs
-heartbeat
-short microphone capture
+boot  
+Wi-Fi  
+device authentication  
+CONFIRM  
+DENY  
+LOG  
+RECAP  
+sensing toggle  
+LEDs  
+heartbeat  
+short microphone capture  
 basic backend communication
-```
 
 The goal is discovering hardware problems early.
 
@@ -2166,13 +2218,11 @@ The goal is discovering hardware problems early.
 
 Add:
 
-```text
-CareRecipient
-Caregiver
-Device
-recipient timezone
+CareRecipient  
+Caregiver  
+Device  
+recipient timezone  
 current caregiver
-```
 
 ---
 
@@ -2180,12 +2230,10 @@ current caregiver
 
 Persist:
 
-```text
-heartbeat
-online/offline
-sensing on/off
+heartbeat  
+online/offline  
+sensing on/off  
 sensing intervals
-```
 
 ---
 
@@ -2193,13 +2241,11 @@ sensing intervals
 
 Add:
 
-```text
-scheduled tasks
-recurring tasks
-PRN tasks
-instructions
+scheduled tasks  
+recurring tasks  
+PRN tasks  
+instructions  
 task-event matching
-```
 
 ---
 
@@ -2207,15 +2253,13 @@ task-event matching
 
 Implement:
 
-```text
-upcoming
-completed
-late
-overdue
-missed
-unknown
+upcoming  
+completed  
+late  
+overdue  
+missed  
+unknown  
 unresolved
-```
 
 ---
 
@@ -2223,48 +2267,50 @@ unresolved
 
 Build:
 
-```text
-Today
-Timeline
-Recap
+Today  
+Timeline  
+Recap  
 Care Plan
-```
 
 ---
 
 # 70. Step 10 — Voice LOG Workflow
 
-```text
-LOG
-↓
-audio
-↓
-speech-to-text
-↓
-structured extraction
-↓
-CareEvent
-↓
-read-back
-↓
+LOG  
+↓  
+audio  
+↓  
+speech-to-text  
+↓  
+structured extraction  
+↓  
+event type  
+↓  
+production policy lookup  
+↓  
+CareEvent  
+↓  
+read-back  
+↓  
 CONFIRM / DENY
-```
 
 ---
 
 # 71. Step 11 — Correction Workflow
 
-```text
-DENY
-↓
-voice correction
-↓
-speech-to-text
-↓
-structured amendment
-↓
+DENY  
+↓  
+voice correction  
+↓  
+speech-to-text  
+↓  
+structured amendment  
+↓  
+corrected event type  
+↓  
+fresh production policy lookup  
+↓  
 confirmation
-```
 
 ---
 
@@ -2278,15 +2324,13 @@ Build the full recap system from structured facts without an LLM.
 
 Optional layer:
 
-```text
-fact packet
-↓
-LLM
-↓
-fact validator
-↓
+fact packet  
+↓  
+LLM  
+↓  
+fact validator  
+↓  
 fallback if invalid
-```
 
 ---
 
@@ -2296,37 +2340,31 @@ Complete the physical assistant loop.
 
 At this point:
 
-```text
-CARELAY FUNCTIONAL MVP COMPLETE
-```
+CARERELAY FUNCTIONAL MVP COMPLETE
 
 Capabilities include:
 
-```text
-LOG
-CONFIRM
-DENY
+LOG  
+CONFIRM  
+DENY  
 RECAP
 
-voice logging
-corrections
-structured timeline
-care plan
-rules engine
-dashboard
-speaker
+voice logging  
+corrections  
+structured timeline  
+care plan  
+rules engine  
+dashboard  
+speaker  
 physical controls
-```
 
 ---
 
 # 75. Explicit MVP Boundary
 
-```text
-STEPS 1–14
-=
+STEPS 1–14  
+=  
 COMPLETE PRODUCT MVP
-```
 
 CareRelay is still a complete project if vision is not finished.
 
@@ -2336,7 +2374,6 @@ CareRelay is still a complete project if vision is not finished.
 
 After the MVP:
 
-```text
 15. Visual dataset
 
 16. Vision classifier
@@ -2368,21 +2405,32 @@ After the MVP:
 29. README / architecture / evaluation metrics
 
 30. Demo / portfolio materials
-```
 
-Around Step 20, the policy may be changed after real evaluation.
+At Step 20, automatic logging may be reconsidered only as a deliberate future policy change supported by strong evaluation data.
 
-Likely initial candidates:
+No event type is pre-approved for automatic logging.
 
-```text
-repositioning:
-  auto_log_eligible = True
+If policy changes later, the production EventPolicyRegistry is deliberately changed.
 
-changing:
-  auto_log_eligible = True
-```
+A future policy change may alter:
 
-Only enable this if performance evidence justifies it.
+risk_level  
+and/or  
+auto_log_eligible
+
+based on measured:
+
+model performance  
+false-positive rate  
+correction rate  
+confirmation burden  
+confirmation latency  
+proposal frequency  
+safety considerations
+
+Changing production policy must not require rewriting validator logic.
+
+That is one reason the policy registry remains injectable and separate from the generic validation rules.
 
 ---
 
@@ -2390,25 +2438,23 @@ Only enable this if performance evidence justifies it.
 
 Before vision exists:
 
-```text
-use LOG
-use real speech
+use LOG  
+use real speech  
 use explicitly labeled scripted proposals
-```
 
 Never present simulated computer-vision events as real detections.
 
 After vision exists:
 
-```text
-real activity
-↓
-real model prediction
-↓
-candidate event
-↓
+real activity  
+↓  
+real model prediction  
+↓  
+candidate event  
+↓  
+policy lookup  
+↓  
 CONFIRM / DENY
-```
 
 ---
 
@@ -2416,23 +2462,19 @@ CONFIRM / DENY
 
 Full architecture source of truth:
 
-```text
 docs/ARCHITECTURE.md
-```
 
 README remains shorter and includes:
 
-```text
-Problem
-Solution
-Architecture
-MVP features
-Hardware
-Privacy model
-Evaluation
-Limitations
+Problem  
+Solution  
+Architecture  
+MVP features  
+Hardware  
+Privacy model  
+Evaluation  
+Limitations  
 Demo
-```
 
 ---
 
@@ -2460,84 +2502,138 @@ Demo
 
 11. Every event type has an EventPolicy containing `risk_level`, `auto_log_eligible`, and `proposal_timeout`.
 
-12. `auto_log_eligible` is False for every event type during Step 2.
+12. Event policies are accessed through an injectable EventPolicyRegistry/provider.
 
-13. LOW risk alone does not imply auto-log eligibility.
+13. The production EventPolicyRegistry is the default dependency.
 
-14. Auto-log eligibility is explicit configuration.
+14. Validators and the Step 2 repository must not depend exclusively on an immutable module-level policy constant.
 
-15. EventSource explicitly distinguishes human-initiated from AI-derived sources.
+15. Test-only policy registries may be injected without mutating production configuration.
 
-16. `voice` is human-initiated.
+16. All five currently supported production Step 2 care event types are HIGH risk.
 
-17. Every confirmed event requires `verified_at` and `verification_method`.
+17. `auto_log_eligible` is False for every production Step 2 event type.
 
-18. `manual_entry` is valid only for human-initiated sources.
+18. No care event type is assumed safe for automatic confirmation.
 
-19. `confirm_button` may verify human-initiated or AI-derived events.
+19. LOW and MEDIUM remain valid `RiskLevel` enum values for test-only overrides and possible deliberate future policy changes.
 
-20. `dashboard` may verify human-initiated or AI-derived events.
+20. Production Step 2 policy must not assign LOW or MEDIUM to any supported care event.
 
-21. `auto_logged` is valid only when the source is AI-derived, risk is not HIGH, and `auto_log_eligible=True`.
+21. Risk is derived through policy lookup rather than trusted from an incoming event payload.
 
-22. AI-derived HIGH-risk events cannot auto-log.
+22. Auto-log eligibility is derived through policy lookup rather than trusted from an incoming event payload.
 
-23. Human-initiated HIGH-risk events may be manually entered.
+23. A caller cannot make an event safer by supplying a different risk value.
 
-24. Manual logging always exists through LOG.
+24. Amendments perform a fresh policy lookup from the new event's own event type.
 
-25. Event time and record time are separate.
+25. An amendment never inherits risk from the event it amends.
 
-26. Late event reporting is valid.
+26. Auto-log eligibility is explicit configuration and is never inferred from LOW risk or from an event type's name.
 
-27. Approximate event times are represented honestly.
+27. EventSource explicitly distinguishes human-initiated from AI-derived sources.
 
-28. All datetimes are timezone-aware.
+28. `voice` is human-initiated.
 
-29. Persisted timestamps use UTC.
+29. Every confirmed event requires `verified_at` and `verification_method`.
 
-30. `ended_at` cannot precede `started_at`.
+30. `manual_entry` is valid only for human-initiated sources.
 
-31. Materially future event times are rejected.
+31. `confirm_button` may verify human-initiated or AI-derived events.
 
-32. `evaluation_metadata` is optional.
+32. `dashboard` may verify human-initiated or AI-derived events.
 
-33. Denied AI proposals remain available for evaluation.
+33. `auto_logged` is valid only when the source is AI-derived, policy-derived risk is not HIGH, and the active policy has `auto_log_eligible=True`.
 
-34. Proposal expiry is deterministic and testable.
+34. The `auto_logged` branch is intentionally unreachable under the production Step 2 policy.
 
-35. Scenario P proves auto-logging can work under an explicit test-only policy override.
+35. Scenario P exercises the `auto_logged` validator through an injected test-only policy registry so the guardrail remains tested.
 
-36. Scenario Y proves auto-logging is OFF under the actual Step 2 production policy.
+36. Scenario Y must use the untouched default production policy registry.
 
-37. Missed and unknown are different states.
+37. Scenario Y must not manually supply `risk_level` or `auto_log_eligible`.
 
-38. Sensing coverage influences care-state conclusions.
+38. Scenario Y proves that the real production policy derives HIGH risk and disabled auto-logging for repositioning.
 
-39. Ambient audio alone does not initially create care events.
+39. AI-derived HIGH-risk events require explicit human verification.
 
-40. Continuous raw media is not the primary care record.
+40. Human-initiated HIGH-risk events may be manually entered.
 
-41. Raw media is discarded by default after useful structured information is extracted.
+41. Manual logging always exists through LOG.
 
-42. V1 privacy is honestly described as software-controlled sensing/privacy mode.
+42. Event time and record time are separate.
 
-43. Device API requests are authenticated.
+43. Late event reporting is valid.
 
-44. Device tokens are stored hashed.
+44. Approximate event times are represented honestly.
 
-45. V1 is single-recipient and single-primary-device.
+45. All datetimes are timezone-aware.
 
-46. Recap always works without an LLM.
+46. Persisted timestamps use UTC.
 
-47. LLMs may phrase facts but may not establish facts.
+47. `ended_at` cannot precede `started_at`.
 
-48. MVP functionality does not depend on computer vision.
+48. Materially future event times are rejected.
 
-49. Vision is an automation layer on top of a trustworthy event-record system.
+49. `evaluation_metadata` is optional.
 
-50. Auto-logging remains disabled until later evaluation explicitly justifies enabling it.
+50. Denied AI proposals remain available for evaluation.
 
-51. AI should reduce caregiver workload rather than add it.
+51. Proposal expiry is deterministic and testable.
 
-52. Any new issue discovered from this point becomes a failing test rather than another architecture-planning cycle.
+52. Proposal timeout comes from the active event policy.
+
+53. Scenario N tests risk recomputation in both directions using an injected test-only LOW/HIGH policy registry.
+
+54. Scenario N Case 1 requires parent LOW and child HIGH.
+
+55. Scenario N Case 2 requires parent HIGH and child LOW.
+
+56. Both Scenario N directions are required so a copy-from-parent implementation cannot pass accidentally.
+
+57. Scenario P proves that the generic validator can support auto-logging under an explicit test-only policy override.
+
+58. Scenario Y proves that auto-logging is OFF under the real Step 2 production policy.
+
+59. If auto-logging is ever introduced later, it is a deliberate policy change that must be justified by evaluation evidence.
+
+60. No event type is currently pre-approved for future auto-logging.
+
+61. Confirmation burden is a first-class product metric because every AI-derived event currently requires human confirmation.
+
+62. Confirmation rate, confirmation latency, correction rate, and proposal frequency must be measured during evaluation.
+
+63. Missed and unknown are different states.
+
+64. Sensing coverage influences care-state conclusions.
+
+65. Ambient audio alone does not initially create care events.
+
+66. Continuous raw media is not the primary care record.
+
+67. Raw media is discarded by default after useful structured information is extracted.
+
+68. V1 privacy is honestly described as software-controlled sensing/privacy mode.
+
+69. Device API requests are authenticated.
+
+70. Device tokens are stored hashed.
+
+71. V1 is single-recipient and single-primary-device.
+
+72. Recap always works without an LLM.
+
+73. LLMs may phrase facts but may not establish facts.
+
+74. MVP functionality does not depend on computer vision.
+
+75. Vision is an automation layer on top of a trustworthy event-record system.
+
+76. AI should reduce caregiver workload rather than add it.
+
+77. Policy configuration and generic validation logic remain separate so future policy changes do not require rewriting domain validators.
+
+78. Tests must not mutate shared global production policy state.
+
+79. Any new issue discovered from this point becomes a failing test rather than another architecture-planning cycle.
