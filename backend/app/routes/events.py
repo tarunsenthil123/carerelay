@@ -19,9 +19,6 @@ from backend.app.models.events import (
     CareEvent,
     CareEventDraft,
 )
-from backend.app.services.event_repository import (
-    InMemoryEventRepository,
-)
 
 
 router = APIRouter(
@@ -42,7 +39,7 @@ class ConfirmEventRequest(BaseModel):
 
 def get_event_repository(
     request: Request,
-) -> InMemoryEventRepository:
+):
     return request.app.state.event_repository
 
 

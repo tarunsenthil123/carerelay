@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: carerelay-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: carerelay
+      POSTGRES_PASSWORD: carerelay_dev
+      POSTGRES_DB: carerelay
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - carerelay_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carerelay -d carerelay"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+volumes:
+  carerelay_postgres_data:
